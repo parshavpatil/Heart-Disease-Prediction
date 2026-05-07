@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Heart Disease Predictor</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      padding: 30px 15px;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #e53e3e, #c53030);
+      color: white;
+      padding: 35px 40px;
+      text-align: center;
+    }
+    .header .icon { font-size: 48px; margin-bottom: 10px; }
+    .header h1   { font-size: 26px; font-weight: 700; }
+    .header p    { font-size: 14px; margin-top: 6px; opacity: 0.85; }
+
+    .form-body { padding: 35px 40px; }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #e53e3e;
+      margin: 25px 0 14px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid #fed7d7;
+    }
+    .section-title:first-child { margin-top: 0; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .field { display: flex; flex-direction: column; }
+    .field.full { grid-column: 1 / -1; }
+
+    label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #4a5568;
+      margin-bottom: 5px;
+    }
+    label span {
+      font-weight: 400;
+      color: #a0aec0;
+      font-size: 12px;
+    }
+
+    input, select {
+      padding: 10px 14px;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 14px;
+      color: #2d3748;
+      background: #f8fafc;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+    input:focus, select:focus {
+      border-color: #e53e3e;
+      box-shadow: 0 0 0 3px rgba(229,62,62,0.1);
+      background: white;
+    }
+
+    .btn-wrap { margin-top: 30px; }
+    button {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #e53e3e, #c53030);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(229,62,62,0.35);
+    }
+    button:active { transform: translateY(0); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    #result { margin-top: 25px; display: none; }
+
+    .result-card {
+      border-radius: 14px;
+      padding: 25px;
+      text-align: center;
+      animation: fadeIn 0.4s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-card.disease {
+      background: linear-gradient(135deg, #fff5f5, #fed7d7);
+      border: 2px solid #fc8181;
+    }
+    .result-card.no-disease {
+      background: linear-gradient(135deg, #f0fff4, #c6f6d5);
+      border: 2px solid #68d391;
+    }
+
+    .result-icon  { font-size: 52px; margin-bottom: 10px; }
+    .result-title { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+    .result-card.disease    .result-title { color: #c53030; }
+    .result-card.no-disease .result-title { color: #276749; }
+    .result-sub { font-size: 14px; color: #718096; margin-bottom: 20px; }
+
+    .prob-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .prob-label { font-size: 13px; font-weight: 600; width: 110px; text-align: right; color: #4a5568; }
+    .prob-bar-wrap { flex: 1; background: #e2e8f0; border-radius: 99px; height: 10px; }
+    .prob-bar { height: 10px; border-radius: 99px; transition: width 0.8s ease; }
+    .prob-bar.red   { background: linear-gradient(90deg, #fc8181, #e53e3e); }
+    .prob-bar.green { background: linear-gradient(90deg, #68d391, #38a169); }
+    .prob-val { font-size: 13px; font-weight: 700; width: 45px; color: #2d3748; }
+
+    .error-card {
+      background: #fff5f5;
+      border: 2px solid #fc8181;
+      border-radius: 12px;
+      padding: 16px 20px;
+      color: #c53030;
+      font-size: 14px;
+      font-weight: 600;
+      margin-top: 20px;
+      display: none;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 16px;
+      font-size: 12px;
+      color: #a0aec0;
+      border-top: 1px solid #f0f0f0;
+    }
+
+    @media (max-width: 500px) {
+      .grid { grid-template-columns: 1fr; }
+      .form-body { padding: 25px 20px; }
+      .header { padding: 25px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <div class="icon">🫀</div>
+    <h1>Heart Disease Predictor</h1>
+    <p>Enter patient details below to get an instant AI prediction</p>
+  </div>
+
+  <div class="form-body">
+
+    <!-- Section 1: Patient Info -->
+    <div class="section-title">👤 Patient Info</div>
+    <div class="grid">
+      <div class="field">
+        <label>Age <span>(years)</span></label>
+        <input type="number" id="age" placeholder="e.g. 52" min="1" max="120" />
+      </div>
+      <div class="field">
+        <label>Sex</label>
+        <select id="sex">
+          <option value="">-- Select --</option>
+          <option value="1">Male</option>
+          <option value="0">Female</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Section 2: Clinical Details -->
+    <div class="section-title">🩺 Clinical Details</div>
+    <div class="grid">
+      <div class="field">
+        <label>Chest Pain Type <span>(cp)</span></label>
+        <select id="cp">
+          <option value="">-- Select --</option>
+          <option value="0">0 – Typical Angina</option>
+          <option value="1">1 – Atypical Angina</option>
+          <option value="2">2 – Non-anginal Pain</option>
+          <option value="3">3 – Asymptomatic</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Resting BP <span>(mm Hg)</span></label>
+        <input type="number" id="trestbps" placeholder="e.g. 130" />
+      </div>
+      <div class="field">
+        <label>Cholesterol <span>(mg/dl)</span></label>
+        <input type="number" id="chol" placeholder="e.g. 250" />
+      </div>
+      <div class="field">
+        <label>Fasting Blood Sugar <span>&gt;120 mg/dl</span></label>
+        <select id="fbs">
+          <option value="">-- Select --</option>
+          <option value="1">Yes (&gt; 120)</option>
+          <option value="0">No (≤ 120)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Resting ECG <span>(restecg)</span></label>
+        <select id="restecg">
+          <option value="">-- Select --</option>
+          <option value="0">0 – Normal</option>
+          <option value="1">1 – ST-T Abnormality</option>
+          <option value="2">2 – LV Hypertrophy</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Max Heart Rate <span>(thalach)</span></label>
+        <input type="number" id="thalach" placeholder="e.g. 150" />
+      </div>
+    </div>
+
+    <!-- Section 3: Exercise -->
+    <div class="section-title">💪 Exercise Details</div>
+    <div class="grid">
+      <div class="field">
+        <label>Exercise Induced Angina</label>
+        <select id="exang">
+          <option value="">-- Select --</option>
+          <option value="1">Yes</option>
+          <option value="0">No</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>ST Depression <span>(oldpeak)</span></label>
+        <input type="number" id="oldpeak" placeholder="e.g. 1.5" step="0.1" />
+      </div>
+    </div>
+
+    <!-- Button -->
+    <div class="btn-wrap">
+      <button id="predictBtn" onclick="predict()">🔍 Predict Now</button>
+    </div>
+
+    <!-- Error -->
+    <div class="error-card" id="errorCard"></div>
+
+    <!-- Result -->
+    <div id="result"></div>
+
+  </div>
+
+  <div class="footer">&nbsp; Heart Disease Predictor based on UCI Dataset</div>
+</div>
+
+<script>
+  async function predict() {
+    const btn      = document.getElementById('predictBtn');
+    const errorCard = document.getElementById('errorCard');
+    const resultDiv = document.getElementById('result');
+
+    // Reset
+    errorCard.style.display = 'none';
+    resultDiv.style.display = 'none';
+
+    // Exactly 10 fields matching the dataset
+    const fields = ['age', 'sex', 'cp', 'trestbps', 'chol',
+                    'fbs', 'restecg', 'thalach', 'exang', 'oldpeak'];
+
+    const data = {};
+    for (const f of fields) {
+      const val = document.getElementById(f).value;
+      if (val === '' || val === null) {
+        errorCard.textContent = `❌ Please fill in all fields. Missing: "${f}"`;
+        errorCard.style.display = 'block';
+        return;
+      }
+      data[f] = val;
+    }
+
+    // Loading
+    btn.disabled = true;
+    btn.textContent = '⏳ Predicting...';
+
+    try {
+      const res  = await fetch('/predict', {
+        method : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body   : JSON.stringify(data)
+      });
+      const json = await res.json();
+
+      if (json.error) throw new Error(json.error);
+
+      const isDisease = json.prediction === 1;
+
+      resultDiv.innerHTML = `
+        <div class="result-card ${isDisease ? 'disease' : 'no-disease'}">
+          <div class="result-icon">${isDisease ? '⚠️' : '✅'}</div>
+          <div class="result-title">${json.result}</div>
+          <div class="result-sub">Confidence breakdown:</div>
+
+          <div class="prob-row">
+            <div class="prob-label">No Disease</div>
+            <div class="prob-bar-wrap">
+              <div class="prob-bar green" style="width:${json.prob_no}%"></div>
+            </div>
+            <div class="prob-val">${json.prob_no}%</div>
+          </div>
+          <div class="prob-row">
+            <div class="prob-label">Disease</div>
+            <div class="prob-bar-wrap">
+              <div class="prob-bar red" style="width:${json.prob_yes}%"></div>
+            </div>
+            <div class="prob-val">${json.prob_yes}%</div>
+          </div>
+        </div>
+      `;
+      resultDiv.style.display = 'block';
+
+    } catch (err) {
+      errorCard.textContent = '❌ Error: ' + err.message;
+      errorCard.style.display = 'block';
+    }
+
+    btn.disabled = false;
+    btn.textContent = '🔍 Predict Now';
+  }
+</script>
+
+</body>
+</html>

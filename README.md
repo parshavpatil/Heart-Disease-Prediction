@@ -2,11 +2,7 @@
 
 A Machine Learning web application that predicts whether a patient has heart disease or not based on clinical data.
 
-<<<<<<< HEAD
->  🔴 ***Live Demo:*** [Heart Disease Prediction](https://heart-disease-prediction-6pgm.onrender.com)
-=======
-> 🔴 **Live Demo:** [Click Here to Try It](https://heart-disease-prediction-6pgm.onrender.com/)
->>>>>>> 79c861e (docker file added)
+🔴 ***Live Demo:*** [Heart Disease Prediction](https://heart-disease-prediction-6pgm.onrender.com)
 
 ---
 
